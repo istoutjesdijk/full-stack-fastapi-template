@@ -69,6 +69,15 @@ sentry_dsn:
   default: ""
 
 _exclude:
+  # Copier's built-in defaults — must be re-listed, because defining a custom
+  # _exclude replaces copier's defaults (so copier would otherwise walk .git,
+  # which breaks `copier update`).
+  - copier.yml
+  - copier.yaml
+  - "~*"
+  - "*.py[co]"
+  - .git
+  - .svn
   # Global
   - .vscode
   - .mypy_cache
