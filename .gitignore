@@ -8,7 +8,8 @@ node_modules/
 
 # Secrets: the real .env is not tracked in generated projects (manage values in
 # your deploy platform / a local .env). .env.example is the tracked reference.
-.env
+# Root-anchored so it does not also match frontend/.env (which is tracked).
+/.env
 
 # Local envs, build output and caches
 .venv/

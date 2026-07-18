@@ -24,6 +24,13 @@ def set_env_values(path: Path, values: dict[str, str]) -> None:
     path.write_text("\n".join(lines) + "\n")
 
 
+# The root .env is git-ignored, so Copier does not copy it into a generated
+# project; create it from the tracked .env.example before patching.
+env_path = root_path / ".env"
+example_path = root_path / ".env.example"
+if not env_path.exists() and example_path.exists():
+    env_path.write_text(example_path.read_text())
+
 # 1) Scalar answers (project_name, secret_key, ...) -> root .env
 scalar_values = {key.upper(): str(value) for key, value in answers.items()}
 
