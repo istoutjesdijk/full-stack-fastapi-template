@@ -1,11 +1,15 @@
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useQuery } from "@tanstack/react-query"
 import {
   createFileRoute,
   Link as RouterLink,
   redirect,
+  useNavigate,
 } from "@tanstack/react-router"
+import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
+import { LoginService } from "@/client"
 import { AuthLayout } from "@/components/Common/AuthLayout"
 import {
   Form,
@@ -59,6 +63,21 @@ export const Route = createFileRoute("/signup")({
 
 function SignUp() {
   const { signUpMutation } = useAuth()
+  const navigate = useNavigate()
+  // Same login config as the login page; if signup is disabled this page is
+  // unreachable and we send the user back to /login.
+  const { data: config } = useQuery({
+    queryKey: ["loginConfig"],
+    queryFn: LoginService.loginConfig,
+    staleTime: Number.POSITIVE_INFINITY,
+  })
+
+  useEffect(() => {
+    if (config && !config.signup_enabled) {
+      navigate({ to: "/login" })
+    }
+  }, [config, navigate])
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     mode: "onBlur",

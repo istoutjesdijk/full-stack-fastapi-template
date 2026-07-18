@@ -36,6 +36,15 @@ export type ItemUpdate = {
     description?: (string | null);
 };
 
+/**
+ * Public login options so the login page knows what to render.
+ */
+export type LoginConfig = {
+    password_login_enabled: boolean;
+    sso_enabled: boolean;
+    signup_enabled: boolean;
+};
+
 export type Message = {
     message: string;
 };
@@ -141,6 +150,8 @@ export type ItemsDeleteItemData = {
 
 export type ItemsDeleteItemResponse = (Message);
 
+export type LoginLoginConfigResponse = (LoginConfig);
+
 export type LoginLoginAccessTokenData = {
     formData: Body_login_login_access_token;
 };
@@ -166,6 +177,16 @@ export type LoginRecoverPasswordHtmlContentData = {
 };
 
 export type LoginRecoverPasswordHtmlContentResponse = (string);
+
+export type OauthOauthLoginResponse = (unknown);
+
+export type OauthOauthCallbackData = {
+    code?: (string | null);
+    error?: (string | null);
+    state?: (string | null);
+};
+
+export type OauthOauthCallbackResponse = (unknown);
 
 export type PrivateCreateUserData = {
     requestBody: PrivateUserCreate;
