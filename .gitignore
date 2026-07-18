@@ -5,3 +5,16 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Secrets: the real .env is not tracked in generated projects (manage values in
+# your deploy platform / a local .env). .env.example is the tracked reference.
+.env
+
+# Local envs, build output and caches
+.venv/
+/frontend/dist/
+/backend/htmlcov/
+
+# Tooling / assistant artifacts
+.playwright-mcp/
+.claude/
