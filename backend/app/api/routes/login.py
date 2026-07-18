@@ -4,6 +4,7 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
+from sqlmodel import SQLModel
 
 from app import crud
 from app.api.deps import CurrentUser, SessionDep, get_current_active_superuser
@@ -20,6 +21,31 @@ from app.utils import (
 router = APIRouter(tags=["login"])
 
 
+class LoginConfig(SQLModel):
+    """Public login options so the login page knows what to render."""
+
+    password_login_enabled: bool
+    sso_enabled: bool
+    signup_enabled: bool
+
+
+def _require_password_login() -> None:
+    if not settings.PASSWORD_LOGIN_ENABLED:
+        raise HTTPException(status_code=403, detail="Password login is disabled")
+
+
+@router.get("/login/config")
+def login_config() -> LoginConfig:
+    """
+    Public login configuration for the login page
+    """
+    return LoginConfig(
+        password_login_enabled=settings.PASSWORD_LOGIN_ENABLED,
+        sso_enabled=settings.oidc_enabled,
+        signup_enabled=settings.USERS_OPEN_REGISTRATION,
+    )
+
+
 @router.post("/login/access-token")
 def login_access_token(
     session: SessionDep, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
@@ -27,6 +53,7 @@ def login_access_token(
     """
     OAuth2 compatible token login, get an access token for future requests
     """
+    _require_password_login()
     user = crud.authenticate(
         session=session, email=form_data.username, password=form_data.password
     )
@@ -55,6 +82,7 @@ def recover_password(email: str, session: SessionDep) -> Message:
     """
     Password Recovery
     """
+    _require_password_login()
     user = crud.get_user_by_email(session=session, email=email)
 
     # Always return the same response to prevent email enumeration attacks
@@ -79,6 +107,7 @@ def reset_password(session: SessionDep, body: NewPassword) -> Message:
     """
     Reset password
     """
+    _require_password_login()
     email = verify_password_reset_token(token=body.token)
     if not email:
         raise HTTPException(status_code=400, detail="Invalid token")
