@@ -29,6 +29,7 @@ dev = [
     "prek>=0.2.24,<1.0.0",
     "coverage<8.0.0,>=7.4.3",
     "respx<1.0.0,>=0.23.1",
+    "pytest-env<2.0.0,>=1.1.0",
 ]
 
 [build-system]
@@ -38,6 +39,14 @@ build-backend = "hatchling.build"
 [tool.mypy]
 strict = true
 exclude = ["venv", ".venv", "alembic"]
+
+[tool.pytest.ini_options]
+# Force the test database before the app's settings singleton is imported, so
+# tests never touch the dev DB. backend/conftest.py additionally refuses to run
+# if POSTGRES_DB does not end in "_test".
+env = [
+    "POSTGRES_DB=app_test",
+]
 
 [tool.ruff]
 target-version = "py312"
