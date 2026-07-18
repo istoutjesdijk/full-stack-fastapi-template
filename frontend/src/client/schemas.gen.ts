@@ -196,6 +196,27 @@ export const ItemsPublicSchema = {
     title: 'ItemsPublic'
 } as const;
 
+export const LoginConfigSchema = {
+    properties: {
+        password_login_enabled: {
+            type: 'boolean',
+            title: 'Password Login Enabled'
+        },
+        sso_enabled: {
+            type: 'boolean',
+            title: 'Sso Enabled'
+        },
+        signup_enabled: {
+            type: 'boolean',
+            title: 'Signup Enabled'
+        }
+    },
+    type: 'object',
+    required: ['password_login_enabled', 'sso_enabled', 'signup_enabled'],
+    title: 'LoginConfig',
+    description: 'Public login options so the login page knows what to render.'
+} as const;
+
 export const MessageSchema = {
     properties: {
         message: {
