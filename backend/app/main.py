@@ -1,10 +1,13 @@
 import sentry_sdk
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 from starlette.middleware.cors import CORSMiddleware
 
 from app.api.main import api_router
 from app.core.config import settings
+from app.core.limiter import limiter
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:
@@ -26,6 +29,9 @@ app = FastAPI(
     redoc_url="/redoc" if _docs_enabled else None,
     generate_unique_id_function=custom_generate_unique_id,
 )
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]
 
 # Set all CORS enabled origins
 if settings.all_cors_origins:
