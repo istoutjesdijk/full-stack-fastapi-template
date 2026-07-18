@@ -218,3 +218,18 @@ def test_access_token_403_when_password_login_disabled(client: TestClient) -> No
         }
         r = client.post(f"{settings.API_V1_STR}/login/access-token", data=login_data)
     assert r.status_code == 403
+
+
+def test_login_rate_limited(client: TestClient) -> None:
+    from app.core.limiter import limiter
+
+    limit = int(settings.LOGIN_RATE_LIMIT.split("/")[0])
+    login_data = {"username": "nobody@example.com", "password": "wrongpassword"}
+    with patch.object(limiter, "enabled", True):
+        statuses = [
+            client.post(
+                f"{settings.API_V1_STR}/login/access-token", data=login_data
+            ).status_code
+            for _ in range(limit + 1)
+        ]
+    assert 429 in statuses
