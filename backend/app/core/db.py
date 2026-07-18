@@ -4,7 +4,16 @@ from app import crud
 from app.core.config import settings
 from app.models import User, UserCreate
 
-engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
+# Enlarge the pool and enable liveness checks: pool_pre_ping avoids errors from
+# connections dropped after a database restart, and the larger pool prevents
+# exhaustion when many requests run concurrent queries.
+engine = create_engine(
+    str(settings.SQLALCHEMY_DATABASE_URI),
+    pool_size=20,
+    max_overflow=30,
+    pool_pre_ping=True,
+    pool_recycle=1800,
+)
 
 
 # make sure all SQLModel models are imported (app.models) before initializing DB
