@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { Loader2 } from "lucide-react"
 import { useEffect } from "react"
+import { APP_NAME } from "@/config"
 
 // Landing page the backend redirects to after a successful SSO login: the app
 // JWT arrives as a URL fragment (#access_token=...) so it stays out of server
@@ -11,7 +12,7 @@ export const Route = createFileRoute("/oauth-callback")({
   head: () => ({
     meta: [
       {
-        title: "Logging in - FastAPI Cloud",
+        title: `Logging in - ${APP_NAME}`,
       },
     ],
   }),
