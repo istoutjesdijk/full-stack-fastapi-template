@@ -46,6 +46,8 @@ exclude = ["venv", ".venv", "alembic"]
 # if POSTGRES_DB does not end in "_test".
 env = [
     "POSTGRES_DB=app_test",
+    # Tests assume open registration; the gate itself is covered explicitly.
+    "USERS_OPEN_REGISTRATION=true",
 ]
 
 [tool.ruff]
