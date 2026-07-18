@@ -1,11 +1,8 @@
 import { Link } from "@tanstack/react-router"
+import type { ReactNode } from "react"
 
-import { useTheme } from "@/components/theme-provider"
+import { APP_NAME } from "@/config"
 import { cn } from "@/lib/utils"
-import icon from "/assets/images/fastapi-icon.svg"
-import iconLight from "/assets/images/fastapi-icon-light.svg"
-import logo from "/assets/images/fastapi-logo.svg"
-import logoLight from "/assets/images/fastapi-logo-light.svg"
 
 interface LogoProps {
   variant?: "full" | "icon" | "responsive"
@@ -18,39 +15,41 @@ export function Logo({
   className,
   asLink = true,
 }: LogoProps) {
-  const { resolvedTheme } = useTheme()
-  const isDark = resolvedTheme === "dark"
+  const initial = APP_NAME.charAt(0).toUpperCase()
 
-  const fullLogo = isDark ? logoLight : logo
-  const iconLogo = isDark ? iconLight : icon
-
-  const content =
-    variant === "responsive" ? (
-      <>
-        <img
-          src={fullLogo}
-          alt="FastAPI"
-          className={cn(
-            "h-6 w-auto group-data-[collapsible=icon]:hidden",
-            className,
-          )}
-        />
-        <img
-          src={iconLogo}
-          alt="FastAPI"
-          className={cn(
-            "size-5 hidden group-data-[collapsible=icon]:block",
-            className,
-          )}
-        />
-      </>
-    ) : (
-      <img
-        src={variant === "full" ? fullLogo : iconLogo}
-        alt="FastAPI"
-        className={cn(variant === "full" ? "h-6 w-auto" : "size-5", className)}
-      />
+  let content: ReactNode
+  if (variant === "icon") {
+    content = (
+      <span className={cn("text-lg font-semibold text-foreground", className)}>
+        {initial}
+      </span>
     )
+  } else if (variant === "responsive") {
+    content = (
+      <span
+        className={cn(
+          "text-lg font-semibold tracking-tight text-foreground",
+          className,
+        )}
+      >
+        <span className="group-data-[collapsible=icon]:hidden">{APP_NAME}</span>
+        <span className="hidden group-data-[collapsible=icon]:inline">
+          {initial}
+        </span>
+      </span>
+    )
+  } else {
+    content = (
+      <span
+        className={cn(
+          "text-lg font-semibold tracking-tight text-foreground",
+          className,
+        )}
+      >
+        {APP_NAME}
+      </span>
+    )
+  }
 
   if (!asLink) {
     return content

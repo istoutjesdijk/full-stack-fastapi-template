@@ -10,6 +10,13 @@ export default defineConfig(({ mode }) => {
   // so multiple stacks generated from this template can run side by side.
   const rootEnv = loadEnv(mode, path.resolve(__dirname, ".."), "")
   return {
+    // Expose the project name to the client as VITE_APP_NAME, sourced from
+    // PROJECT_NAME in the root .env so branding follows the Copier answer.
+    define: {
+      "import.meta.env.VITE_APP_NAME": JSON.stringify(
+        rootEnv.PROJECT_NAME || "App",
+      ),
+    },
     server: {
       host: true,
       port: Number(rootEnv.FRONTEND_PORT) || 5173,
