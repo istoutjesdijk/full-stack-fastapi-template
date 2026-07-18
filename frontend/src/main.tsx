@@ -25,6 +25,15 @@ const handleApiError = (error: Error) => {
   }
 }
 const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Avoid refetching every active query on tab refocus (a "refetch storm");
+      // 30s of freshness covers most dashboards. Interval polls are unaffected.
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
   queryCache: new QueryCache({
     onError: handleApiError,
   }),
