@@ -4,6 +4,40 @@
 <a href="https://github.com/fastapi/full-stack-fastapi-template/actions?query=workflow%3A%22Test+Backend%22" target="_blank"><img src="https://github.com/fastapi/full-stack-fastapi-template/workflows/Test%20Backend/badge.svg" alt="Test Backend"></a>
 <a href="https://coverage-badge.samuelcolvin.workers.dev/redirect/fastapi/full-stack-fastapi-template" target="_blank"><img src="https://coverage-badge.samuelcolvin.workers.dev/fastapi/full-stack-fastapi-template.svg" alt="Coverage"></a>
 
+## Base tweaks in this fork
+
+This fork adds a curated base set of fixes and features on top of the upstream release (`0.10.0`), so every new project generated from it starts with them. Everything optional is off by default — a fresh `copier copy` behaves like the upstream template until you configure it.
+
+**Authentication**
+
+- **OIDC / SSO login** (e.g. Authentik): backend `/oauth/login` + `/oauth/callback` (Authorization Code + PKCE), a public `/login/config` endpoint, and a login page with a "Log in with SSO" button. Enable by setting `OIDC_ISSUER`, `OIDC_CLIENT_ID` and `OIDC_CLIENT_SECRET` in `.env`; members of `OIDC_ADMIN_GROUP` become superusers. Returns 404 until configured, so password login is unaffected.
+- **Auth toggles**: `PASSWORD_LOGIN_ENABLED` (set `False` to make SSO the only login) and `USERS_OPEN_REGISTRATION` (set `True` to allow open signup), enforced on both the API and the UI.
+
+**Frontend**
+
+- De-branded: FastAPI logos/socials removed. The app name comes from a single `APP_NAME` (from `VITE_APP_NAME`, injected from `PROJECT_NAME`), so a new project rebrands from one Copier answer.
+- Fixed the sticky header (opaque background + `min-w-0`) so content no longer shows through it and it no longer overlaps the menu on horizontal scroll.
+- Theme defaults to `system`.
+
+**Backend**
+
+- Python 3.12; `pool_pre_ping` and a larger database connection pool.
+- Tests refuse to run unless `POSTGRES_DB` ends in `_test`, and use an isolated `app_test` database (via `pytest-env`), so the suite can never wipe your dev database.
+
+**Developer experience**
+
+- `make dev` runs the backend and frontend together.
+- All dev host ports are configurable via `.env`; set `dev_port_offset` at `copier copy` time so multiple projects run side by side without collisions.
+- `.env` is gitignored (with a tracked `.env.example`); `respx` is added for tests; pre-commit runs biome via `bun` and mypy from `backend/`.
+
+**Deployment**
+
+- `compose.coolify.yml` skeleton for deploying to Coolify (managed Postgres, no Traefik). The upstream GitHub Actions workflows are removed.
+
+**Copier**
+
+- `copier copy` / `copier update` set branding, frontend env and non-colliding dev ports automatically. Existing projects can pull this base set with `copier update`.
+
 ## Technology Stack and Features
 
 - ⚡ [**FastAPI**](https://fastapi.tiangolo.com) for the Python backend API.
