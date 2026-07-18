@@ -189,3 +189,32 @@ def test_login_with_argon2_password_keeps_hash(client: TestClient, db: Session) 
 
     assert user.hashed_password == original_hash
     assert user.hashed_password.startswith("$argon2")
+
+
+def test_login_config(client: TestClient) -> None:
+    r = client.get(f"{settings.API_V1_STR}/login/config")
+    assert r.status_code == 200
+    config = r.json()
+    assert set(config) == {
+        "password_login_enabled",
+        "sso_enabled",
+        "signup_enabled",
+    }
+    assert config["password_login_enabled"] is True
+    # OIDC is not configured in the test environment.
+    assert config["sso_enabled"] is False
+
+
+def test_oauth_login_returns_404_without_oidc(client: TestClient) -> None:
+    r = client.get(f"{settings.API_V1_STR}/oauth/login")
+    assert r.status_code == 404
+
+
+def test_access_token_403_when_password_login_disabled(client: TestClient) -> None:
+    with patch.object(settings, "PASSWORD_LOGIN_ENABLED", False):
+        login_data = {
+            "username": settings.FIRST_SUPERUSER,
+            "password": settings.FIRST_SUPERUSER_PASSWORD,
+        }
+        r = client.post(f"{settings.API_V1_STR}/login/access-token", data=login_data)
+    assert r.status_code == 403

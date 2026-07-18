@@ -519,3 +519,14 @@ def test_delete_user_without_privileges(
     )
     assert r.status_code == 403
     assert r.json()["detail"] == "The user doesn't have enough privileges"
+
+
+def test_register_user_403_when_registration_disabled(client: TestClient) -> None:
+    with patch.object(settings, "USERS_OPEN_REGISTRATION", False):
+        data = {
+            "email": random_email(),
+            "password": random_lower_string(),
+            "full_name": random_lower_string(),
+        }
+        r = client.post(f"{settings.API_V1_STR}/users/signup", json=data)
+    assert r.status_code == 403
