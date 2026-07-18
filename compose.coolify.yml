@@ -1,0 +1,78 @@
+# Coolify deployment - no Traefik (Coolify provides its own proxy + TLS).
+# Postgres is Coolify-managed: create a Postgres resource and point POSTGRES_* at
+# it (there is no db service here). Set env/secrets in the Coolify UI (see
+# .env.example). In Coolify: give `backend` a domain -> container port 8000 and
+# `frontend` a domain -> container port 80.
+#
+# If your app keeps in-memory state (a background scheduler, websockets/SSE), run
+# a single worker/replica and pin replicas = 1 in the Coolify UI.
+services:
+  prestart:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    # Runs Alembic migrations (and any other startup tasks) before the backend
+    # starts; the backend waits for this to complete successfully.
+    command: bash scripts/prestart.sh
+    env_file:
+      - .env
+    restart: "no"
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+        reservations:
+          memory: 256M
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    env_file:
+      - .env
+    # Coolify routes the API domain to this container port.
+    expose:
+      - "8000"
+    depends_on:
+      prestart:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    healthcheck:
+      test:
+        ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      # grace window while prestart migrations run and the app boots
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        # Public URL of the backend, injected at build time via Coolify build args.
+        - VITE_API_URL=${VITE_API_URL:-https://api.localhost}
+        - NODE_ENV=production
+    restart: unless-stopped
+    # Coolify routes the app domain to this container port.
+    expose:
+      - "80"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+        reservations:
+          memory: 128M
