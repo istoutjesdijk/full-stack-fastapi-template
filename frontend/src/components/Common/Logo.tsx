@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router"
-import type { ReactNode } from "react"
 
-import { APP_NAME } from "@/config"
+import { useTheme } from "@/components/theme-provider"
+import { APP_NAME, LOGO } from "@/config"
 import { cn } from "@/lib/utils"
 
 interface LogoProps {
@@ -15,41 +15,42 @@ export function Logo({
   className,
   asLink = true,
 }: LogoProps) {
-  const initial = APP_NAME.charAt(0).toUpperCase()
+  const { resolvedTheme } = useTheme()
+  // Logo files live in public/assets/images and are named after the VITE_LOGO
+  // base (default "logo"). The "-light" variants are the light-ink versions for
+  // dark backgrounds. Rebrand by dropping in your own <name>*.svg set and
+  // setting VITE_LOGO=<name>.
+  const suffix = resolvedTheme === "dark" ? "-light" : ""
+  const fullSrc = `/assets/images/${LOGO}${suffix}.svg`
+  const iconSrc = `/assets/images/${LOGO}-icon${suffix}.svg`
 
-  let content: ReactNode
-  if (variant === "icon") {
-    content = (
-      <span className={cn("text-lg font-semibold text-foreground", className)}>
-        {initial}
-      </span>
+  const content =
+    variant === "responsive" ? (
+      <>
+        <img
+          src={fullSrc}
+          alt={APP_NAME}
+          className={cn(
+            "h-6 w-auto group-data-[collapsible=icon]:hidden",
+            className,
+          )}
+        />
+        <img
+          src={iconSrc}
+          alt={APP_NAME}
+          className={cn(
+            "size-5 hidden group-data-[collapsible=icon]:block",
+            className,
+          )}
+        />
+      </>
+    ) : (
+      <img
+        src={variant === "full" ? fullSrc : iconSrc}
+        alt={APP_NAME}
+        className={cn(variant === "full" ? "h-6 w-auto" : "size-5", className)}
+      />
     )
-  } else if (variant === "responsive") {
-    content = (
-      <span
-        className={cn(
-          "text-lg font-semibold tracking-tight text-foreground",
-          className,
-        )}
-      >
-        <span className="group-data-[collapsible=icon]:hidden">{APP_NAME}</span>
-        <span className="hidden group-data-[collapsible=icon]:inline">
-          {initial}
-        </span>
-      </span>
-    )
-  } else {
-    content = (
-      <span
-        className={cn(
-          "text-lg font-semibold tracking-tight text-foreground",
-          className,
-        )}
-      >
-        {APP_NAME}
-      </span>
-    )
-  }
 
   if (!asLink) {
     return content
