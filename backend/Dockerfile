@@ -42,4 +42,10 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 WORKDIR /app/backend/
 
+# Trust X-Forwarded-* from the reverse proxy (Coolify/Traefik) so request.url
+# reflects the public https scheme. Required for correct OIDC redirect URIs and
+# absolute links, and for real client IPs in logs/Sentry. Safe here because the
+# backend is only reachable over the proxy network, never published directly.
+ENV FORWARDED_ALLOW_IPS="*"
+
 CMD ["fastapi", "run", "--workers", "4", "app/main.py"]
