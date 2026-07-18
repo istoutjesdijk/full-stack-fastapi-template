@@ -8,6 +8,15 @@ stack_name:
   help: The name of the stack used for Docker Compose labels (no spaces) (in .env)
   default: fastapi-project
 
+dev_port_offset:
+  type: int
+  help: |
+    Offset added to every local dev port (backend 8000, frontend 5173, adminer
+    8080, ...), so several projects generated from this template can run at the
+    same time. Use a different value per project (e.g. 0, 1, 2); 0 keeps the
+    template defaults.
+  default: 0
+
 secret_key:
   type: str
   help: |
