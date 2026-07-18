@@ -48,6 +48,29 @@ class Settings(BaseSettings):
             self.FRONTEND_HOST
         ]
 
+    # Central login (SSO) via an OIDC provider (e.g. Authentik). OIDC stays off
+    # until issuer, client id and client secret are all set, so local dev keeps
+    # working without SSO. Only set OIDC_REDIRECT_URI when the public callback
+    # URL cannot be derived from the request (e.g. behind a proxy that drops
+    # forwarded headers).
+    OIDC_ISSUER: str = ""
+    OIDC_CLIENT_ID: str = ""
+    OIDC_CLIENT_SECRET: str = ""
+    OIDC_REDIRECT_URI: str = ""
+    OIDC_ADMIN_GROUP: str = "admins"
+    # Turn off password login (incl. password recovery) once SSO is the only
+    # entry point; the login page then shows just the SSO button.
+    PASSWORD_LOGIN_ENABLED: bool = True
+    # Open signup is off by default (accounts managed centrally via SSO).
+    USERS_OPEN_REGISTRATION: bool = False
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def oidc_enabled(self) -> bool:
+        return bool(
+            self.OIDC_ISSUER and self.OIDC_CLIENT_ID and self.OIDC_CLIENT_SECRET
+        )
+
     PROJECT_NAME: str
     SENTRY_DSN: HttpUrl | None = None
     POSTGRES_SERVER: str
